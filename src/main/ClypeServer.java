@@ -1,54 +1,116 @@
 package main;
 
 import data.ClypeData;
+import java.io.*;
+import  java.net.*;
 
 public class ClypeServer {
     private int port;
-    private boolean closeConnection =false;
-    private ClypeData dataToSendToServer;
-    private ClypeData dataToReceiveFromServer;
+    private boolean closeConnection = false;
+    private ClypeData dataToSendToClient;
+    private ClypeData dataToReceiveFromClient;
     public static final int defaultPort = 7000;
+    private ObjectInputStream inFromClient = null;
+    private ObjectOutputStream outToClient = null;
 
     /**
      * constructor for ClypeServer
+     *
      * @param port
      */
-    public ClypeServer(int port){
-        this.port=port;
-        dataToSendToServer=null;
-        dataToReceiveFromServer=null;
+    public ClypeServer(int port) {
+        try {
+            this.port = port;
+            dataToSendToClient = null;
+            dataToReceiveFromClient = null;
+        } catch (IllegalArgumentException aie) {
+            System.err.println("Illegal port");
+        }
     }
 
     /**
      * default Constructor for ClypeServer
      */
-    public ClypeServer(){
+    public ClypeServer() {
         new ClypeServer(this.defaultPort);
     }
 
     /**
-     * starts server (still a work in progress)
+     * starts server <br>
+     * opens server socket and accepts client socket <br>
+     * it handles recieving and sending data <br>
+     * closes streams and sockets when completed <br>
      */
-    public void start(){
+    public void start() {
+        try {
+            ServerSocket sskt = new ServerSocket(port);
+            Socket cskt = new sskt.accept();
+            inFromClient = new ObjectInputStream(cskt.getInputStream());
+            outToClient = new ObjectOutputStream(cskt.getOutputStream());
+            dataToSendToClient = dataToReceiveFromClient;
+            receiveData();
+            sendData();
 
+            inFromClient.close();
+            outToClient.close();
+            cskt.close();
+            sskt.close();
+        } catch (IOException ioe) {
+            System.err.println("IO error: " + ioe.getMessage());
+        } catch (SocketException se) {
+            System.err.println("Socket exception: " + se.getMessage());
+        }
     }
 
     /**
-     * will recieve data in the future
+     * Opens a server and accepts a client socket <br>
+     * it recieves and echoes data from client then closes <br>
      */
-    public void receiveData(){
+    public void receiveData() {
+        try {
+            ServerSocket sskt = new ServerSocket(port);
+            Socket cskt = new sskt.accept();
+            inFromClient = new ObjectInputStream(cskt.getInputStream());
+            dataToReceiveFromClient = inFromClient.readObject();
+            //for debugging
+            System.out.println(dataToReceiveFromClient);
 
+            inFromClient.close();
+            cskt.close();
+            sskt.close();
+        } catch (IOException ioe) {
+            System.err.println("IO error: " + ioe.getMessage());
+        } catch (SocketException se) {
+            System.err.println("Socket exception: " + se.getMessage());
+        } catch (IllegalArgumentException | ClassNotFoundException iae) {
+            System.err.println("Illegal Arguement: " + iae.getMessage());
+        }
     }
 
     /**
-     * will send data in the future
+     * Sends data <br>
+     * Opens server socket and accepts client socket <br>
+     * sends data to client and closes all sockets and steams when completed <br>
      */
-    public void sendData(){
+    public void sendData() {
+        try {
+            ServerSocket sskt = new ServerSocket(port);
+            Socket cskt = new sskt.accept();
+            outToClient.writeObject(dataToSendToClient);
 
+            outToClient.close();
+            cskt.close();
+            sskt.close();
+        } catch (IOException ioe) {
+            System.err.println("IO error: " + ioe.getMessage());
+        } catch (SocketException se) {
+            System.err.println("Socket exception: " + se.getMessage());
+        } catch (IllegalArgumentException iae) {
+            System.err.println("Illegal Arguement: " + iae.getMessage());
+        }
     }
 
     /**
-     *
      * @return port number
      */
     public int getPort() {
@@ -56,19 +118,19 @@ public class ClypeServer {
     }
 
     /**
-     *
      * @return hashcode
      */
     @Override
     public int hashCode() {
         int result = 17;
         result = 37 * result + getPort();
-        result = 37 * result + (this.closeConnection ? 0:1);
-        return  result;
+        result = 37 * result + (this.closeConnection ? 0 : 1);
+        return result;
     }
 
     /**
      * checks to see if two objects are equal
+     *
      * @param o
      * @return bool
      */
@@ -79,11 +141,22 @@ public class ClypeServer {
     }
 
     /**
-     *
      * @return port number and closedConnection status
      */
     @Override
     public String toString() {
-        return ("Port: "+this.getPort() + "\nClosed Connection: "+this.closeConnection);
+        return ("Port: " + this.getPort() + "\nClosed Connection: " + this.closeConnection);
+    }
+
+    public static void main(String args[]) {
+        if(args[0]==null){
+            ClypeServer CS = new ClypeServer();
+            CS.start();
+        }
+        else{
+            int port = Integer.parseInt(args[0]);
+            ClypeServer CS = new ClypeServer(port);
+            CS.start();
+        }
     }
 }

@@ -81,6 +81,7 @@ public class ClypeClient {
     public void start(){
         try {
             System.out.println("starting socket ...");
+            System.out.println(hostName+ " "+port);
             Socket skt = new Socket(hostName, port);
             System.out.println("opened socket for client");
             inFromServer = new ObjectInputStream(skt.getInputStream());
@@ -149,7 +150,7 @@ public class ClypeClient {
      */
     public void receiveData(){
         try{
-            Socket skt = new Socket(hostName,port);
+            Socket skt = new Socket(this.hostName, this.port);
             inFromServer = new ObjectInputStream(skt.getInputStream());
             dataToReceiveFromServer = (ClypeData)inFromServer.readObject();
         }
@@ -252,7 +253,7 @@ public class ClypeClient {
             ClypeClient CC = new ClypeClient();
             CC.start();
         }
-        else if(args[0] != null){
+        else if(args.length != 0){
             String input = args[0];
             if(input.contains("@") && input.contains(":")){
                 String userName="";

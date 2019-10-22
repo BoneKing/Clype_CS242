@@ -32,7 +32,7 @@ public class ClypeServer {
      * default Constructor for ClypeServer
      */
     public ClypeServer() {
-        new ClypeServer(this.defaultPort);
+        this(defaultPort);
     }
 
     /**

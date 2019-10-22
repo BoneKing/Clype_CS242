@@ -46,6 +46,7 @@ public class ClypeClient {
      */
     public ClypeClient(String userName, String hostName) throws IllegalArgumentException{
         this(userName, hostName, defaultport);
+        //System.out.println("userName = "+userName+" hostname = "+hostName);
         if(userName == null || hostName == null)
             throw new IllegalArgumentException("\nInvalid Input");
     }
@@ -57,8 +58,10 @@ public class ClypeClient {
      */
     public ClypeClient(String userName) throws  IllegalArgumentException{
         this(userName, "localhost", defaultport);
-        if(userName == null)
+        //System.out.println("userName = "+userName+" in constructor with just username");
+        if(userName == null) {
             throw new IllegalArgumentException("\nInvalid Input");
+        }
     }
 
     /**
@@ -77,12 +80,14 @@ public class ClypeClient {
      */
     public void start(){
         try {
+            System.out.println("starting socket ...");
             Socket skt = new Socket(hostName, port);
+            System.out.println("opened socket for client");
             inFromServer = new ObjectInputStream(skt.getInputStream());
             outToServer = new ObjectOutputStream(skt.getOutputStream());
             this.inFromStd = new Scanner(System.in);
-            dataToSendToServer = readClientData();
-            dataToReceiveFromServer = receiveData();
+            //dataToSendToServer = readClientData();
+            //dataToReceiveFromServer = receiveData();
             readClientData();
             receiveData();
             sendData();
@@ -95,9 +100,6 @@ public class ClypeClient {
         }
         catch (IOException ioe){
             System.err.println("IO error: "+ioe.getMessage());
-        }
-        catch (SocketException se){
-            System.err.println("Socket exception: "+se.getMessage());
         }
     }
 
@@ -140,9 +142,6 @@ public class ClypeClient {
         catch (IOException ioe){
             System.err.println("IO error: "+ioe.getMessage());
         }
-        catch (SocketException se){
-            System.err.println("Socket exception: "+se.getMessage());
-        }
     }
     /**
      * recieves data from server <br>
@@ -152,16 +151,14 @@ public class ClypeClient {
         try{
             Socket skt = new Socket(hostName,port);
             inFromServer = new ObjectInputStream(skt.getInputStream());
-            inFromServer.readObject(dataToReceiveFromServer);
+            dataToReceiveFromServer = (ClypeData)inFromServer.readObject();
         }
         catch (IOException ioe){
             System.err.println("IO error: "+ioe.getMessage());
-        }
-        catch (SocketException se){
-            System.err.println("Socket exception: "+se.getMessage());
-        }
-        catch (IllegalArgumentException iae){
+        } catch (IllegalArgumentException iae){
             System.err.println("Illegal Arguement: "+iae.getMessage());
+        } catch (ClassNotFoundException e) {
+            System.err.println("Class not found"+ e.getMessage());
         }
     }
 
@@ -251,7 +248,7 @@ public class ClypeClient {
         }
     }
     public static void main(String args[]) {
-        if(args[0] == null){
+        if(args.length == 0){
             ClypeClient CC = new ClypeClient();
             CC.start();
         }
@@ -265,17 +262,20 @@ public class ClypeClient {
                 int startAfterAT = 1;
                 for(int i=0; input.charAt(i) != '@'; i++){
                     userName = userName+input.charAt(i);
+                    //System.out.println(userName);
                     startAfterAT++;
                 }
                 int startAfterColon = startAfterAT+1;
                 for(int i=startAfterAT;input.charAt(i) != ':'; i++){
                     hostName = hostName+input.charAt(i);
+                    //System.out.println(hostName);
                     startAfterColon++;
                 }
-                for(int i = startAfterColon; i <= input.length();i++){
+                for(int i = startAfterColon; i < input.length();i++){
                     strPort = strPort+input.charAt(i);
                 }
                 port = Integer.parseInt(strPort);
+                //System.out.println("port = "+port);
                 ClypeClient CC = new ClypeClient(userName,hostName,port);
                 CC.start();
 
@@ -286,18 +286,19 @@ public class ClypeClient {
                 int startAfterAT = 1;
                 for(int i=0; input.charAt(i) != '@'; i++){
                     userName = userName+input.charAt(i);
+                    //System.out.println(userName);
                     startAfterAT++;
                 }
-                int startAfterColon = startAfterAT+1;
-                for(int i=startAfterAT;input.charAt(i) != ':'; i++){
+                for(int i=startAfterAT; i<input.length(); i++){
                     hostName = hostName+input.charAt(i);
-                    startAfterColon++;
+                    //System.out.println(hostName);
                 }
                 ClypeClient CC = new ClypeClient(userName, hostName);
                 CC.start();
             }
             else {
                 ClypeClient CC = new ClypeClient(input);
+                //System.out.println(input);
                 CC.start();
             }
         }

@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="ClypeServer">
+    <output-path>$PROJECT_DIR$/..</output-path>
+    <root id="archive" name="ClypeServer.jar">
+      <element id="module-output" name="src" />
+    </root>
+  </artifact>
+</component>

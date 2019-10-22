@@ -44,7 +44,9 @@ public class ClypeServer {
     public void start() {
         try {
             ServerSocket sskt = new ServerSocket(port);
-            Socket cskt = new sskt.accept();
+            System.out.println("socket for server opened");
+            Socket cskt = sskt.accept();
+            System.out.println("client accepted");
             inFromClient = new ObjectInputStream(cskt.getInputStream());
             outToClient = new ObjectOutputStream(cskt.getOutputStream());
             dataToSendToClient = dataToReceiveFromClient;
@@ -57,8 +59,6 @@ public class ClypeServer {
             sskt.close();
         } catch (IOException ioe) {
             System.err.println("IO error: " + ioe.getMessage());
-        } catch (SocketException se) {
-            System.err.println("Socket exception: " + se.getMessage());
         }
     }
 
@@ -69,9 +69,9 @@ public class ClypeServer {
     public void receiveData() {
         try {
             ServerSocket sskt = new ServerSocket(port);
-            Socket cskt = new sskt.accept();
+            Socket cskt = sskt.accept();
             inFromClient = new ObjectInputStream(cskt.getInputStream());
-            dataToReceiveFromClient = inFromClient.readObject();
+            dataToReceiveFromClient = (ClypeData)inFromClient.readObject();
             //for debugging
             System.out.println(dataToReceiveFromClient);
 
@@ -80,8 +80,6 @@ public class ClypeServer {
             sskt.close();
         } catch (IOException ioe) {
             System.err.println("IO error: " + ioe.getMessage());
-        } catch (SocketException se) {
-            System.err.println("Socket exception: " + se.getMessage());
         } catch (IllegalArgumentException | ClassNotFoundException iae) {
             System.err.println("Illegal Arguement: " + iae.getMessage());
         }
@@ -95,7 +93,7 @@ public class ClypeServer {
     public void sendData() {
         try {
             ServerSocket sskt = new ServerSocket(port);
-            Socket cskt = new sskt.accept();
+            Socket cskt = sskt.accept();
             outToClient.writeObject(dataToSendToClient);
 
             outToClient.close();
@@ -103,8 +101,6 @@ public class ClypeServer {
             sskt.close();
         } catch (IOException ioe) {
             System.err.println("IO error: " + ioe.getMessage());
-        } catch (SocketException se) {
-            System.err.println("Socket exception: " + se.getMessage());
         } catch (IllegalArgumentException iae) {
             System.err.println("Illegal Arguement: " + iae.getMessage());
         }
@@ -149,7 +145,7 @@ public class ClypeServer {
     }
 
     public static void main(String args[]) {
-        if(args[0]==null){
+        if(args.length==0){
             ClypeServer CS = new ClypeServer();
             CS.start();
         }

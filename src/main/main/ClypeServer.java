@@ -12,6 +12,8 @@ public class ClypeServer {
     public static final int defaultPort = 7000;
     private ObjectInputStream inFromClient = null;
     private ObjectOutputStream outToClient = null;
+    private ServerSocket sskt=null;
+    private Socket cskt = null;
 
     /**
      * constructor for ClypeServer
@@ -42,24 +44,26 @@ public class ClypeServer {
      * closes streams and sockets when completed <br>
      */
     public void start() {
-        try {
-            ServerSocket sskt = new ServerSocket(port);
-            System.out.println("socket for server opened");
-            Socket cskt = sskt.accept();
-            System.out.println("client accepted");
-            inFromClient = new ObjectInputStream(cskt.getInputStream());
-            outToClient = new ObjectOutputStream(cskt.getOutputStream());
-            dataToSendToClient = dataToReceiveFromClient;
-            receiveData();
-            sendData();
-
-            inFromClient.close();
-            outToClient.close();
-            cskt.close();
-            sskt.close();
-        } catch (IOException ioe) {
-            System.err.println("IO error: " + ioe.getMessage());
-        }
+       try {
+           sskt = new ServerSocket(port);
+           System.out.println("socket for server opened");
+           cskt = sskt.accept();
+           System.out.println("client accepted");
+           outToClient = new ObjectOutputStream(cskt.getOutputStream());
+           inFromClient = new ObjectInputStream(cskt.getInputStream());
+           while(closeConnection == false) {
+               dataToSendToClient = dataToReceiveFromClient;
+               receiveData();
+               sendData();
+           }
+           inFromClient.close();
+           outToClient.close();
+           cskt.close();
+           sskt.close();
+       } catch (IOException ioe) {
+           System.err.println("IO error: " + ioe.getMessage());
+           closeConnection =true;
+       }
     }
 
     /**
@@ -68,20 +72,16 @@ public class ClypeServer {
      */
     public void receiveData() {
         try {
-            ServerSocket sskt = new ServerSocket(port);
-            Socket cskt = sskt.accept();
             inFromClient = new ObjectInputStream(cskt.getInputStream());
             dataToReceiveFromClient = (ClypeData)inFromClient.readObject();
             //for debugging
             System.out.println(dataToReceiveFromClient);
-
-            inFromClient.close();
-            cskt.close();
-            sskt.close();
         } catch (IOException ioe) {
             System.err.println("IO error: " + ioe.getMessage());
+            closeConnection =true;
         } catch (IllegalArgumentException | ClassNotFoundException iae) {
             System.err.println("Illegal Arguement: " + iae.getMessage());
+            closeConnection =true;
         }
     }
 
@@ -92,17 +92,13 @@ public class ClypeServer {
      */
     public void sendData() {
         try {
-            ServerSocket sskt = new ServerSocket(port);
-            Socket cskt = sskt.accept();
             outToClient.writeObject(dataToSendToClient);
-
-            outToClient.close();
-            cskt.close();
-            sskt.close();
         } catch (IOException ioe) {
             System.err.println("IO error: " + ioe.getMessage());
+            closeConnection =true;
         } catch (IllegalArgumentException iae) {
             System.err.println("Illegal Arguement: " + iae.getMessage());
+            closeConnection =true;
         }
     }
 

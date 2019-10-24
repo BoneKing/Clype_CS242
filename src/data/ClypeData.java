@@ -104,10 +104,15 @@ public abstract class ClypeData implements Serializable{
         String encryptedString = "";
         int j =0;
         for(int i=0; i<inputStringToEncrypt.length(); i++){
-            if(j > key.length()) {
+            if(j >= key.length()) {
                 j = 0;
             }
-            encryptedString = encryptedString + (((inputStringToEncrypt.charAt(i)) + key.charAt(j)) % 26);
+            if(inputStringToEncrypt.charAt(i)>='A' || inputStringToEncrypt.charAt(i)<='Z') {
+                encryptedString = encryptedString + (((((inputStringToEncrypt.charAt(i)) + key.charAt(j))-65) % 26)+65);
+            }
+            else{
+                encryptedString = encryptedString + (((((inputStringToEncrypt.charAt(i)) + key.charAt(j))-97) % 26)+97);
+            }
         }
         return encryptedString;
     }
@@ -122,10 +127,15 @@ public abstract class ClypeData implements Serializable{
         String decryptedString = "";
         int j = 0;
         for(int i=0; i<inputStringToDecrypt.length(); i++){
-            if(j > key.length()) {
+            if(j >= key.length()) {
                 j = 0;
             }
-            decryptedString = decryptedString + (((inputStringToDecrypt.charAt(i)) - key.charAt(j)) % 26);
+            if(inputStringToDecrypt.charAt(i)>='A' || inputStringToDecrypt.charAt(i)<='Z') {
+                decryptedString = decryptedString + ((((inputStringToDecrypt.charAt(i)) - key.charAt(j))-65 % 26)+65);
+            }
+            else {
+                decryptedString = decryptedString + ((((inputStringToDecrypt.charAt(i)) - key.charAt(j))-97 % 26)+97);
+            }
         }
         return decryptedString;
 

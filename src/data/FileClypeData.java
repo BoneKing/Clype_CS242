@@ -55,6 +55,7 @@ public class FileClypeData extends ClypeData {
     public void readFileContents() throws IOException{
         try {
             FileReader reader = new FileReader( fileName );
+            String FileContents ="";
             boolean doneReadingFile = false;
             while (!doneReadingFile) {
                 int nextCharacterAsInteger = reader.read();
@@ -62,6 +63,7 @@ public class FileClypeData extends ClypeData {
                 if (!doneReadingFile) {
                     char nextCharacter = (char)nextCharacterAsInteger;
                     System.out.print( nextCharacter );
+                    FileContents=FileContents+nextCharacter;
                 }
             }
             reader.close();

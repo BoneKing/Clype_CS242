@@ -1,13 +1,13 @@
 package main;
 
-public class ClientSideServerListener {
+public class ClientSideServerListener implements Runnable {
     private ClypeClient client;
-
-    public ClientSideServerListener(client){
-
+    public ClientSideServerListener(ClypeClient client) {
+        this.client = client;
     }
-    public run(){
-        while(client.closeConnection == false){
+    @Override
+    public void run() {
+        while(client.isClosed() == false) {
             client.receiveData();
             client.printData();
         }

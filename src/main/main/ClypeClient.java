@@ -87,6 +87,8 @@ public class ClypeClient {
             System.out.println("opened socket for client");
             inFromServer = new ObjectInputStream(skt.getInputStream());
             outToServer = new ObjectOutputStream(skt.getOutputStream());
+            Thread t = new Thread(new ClientSideServerListener(this));
+            t.start();
             while(closeConnection == false) {
                 this.inFromStd = new Scanner(System.in);
                 readClientData();
@@ -94,7 +96,7 @@ public class ClypeClient {
                 sendData();
                 //System.out.println("Sent Data");
                 //receiveData();
-                printData();
+                //printData();
                 //System.out.println("print data");
             }
             outToServer.close();
@@ -273,6 +275,9 @@ public class ClypeClient {
                     "\nPort: "+this.getPort()+
                     "\nClose Connection: "+this.closeConnection);
         }
+    }
+    public boolean isClosed(){
+        return closeConnection;
     }
     public static void main(String args[]) {
         if(args.length == 0){

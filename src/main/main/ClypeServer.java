@@ -3,17 +3,19 @@ package main;
 import data.ClypeData;
 import java.io.*;
 import  java.net.*;
+impor
 
 public class ClypeServer {
     private int port;
     private boolean closeConnection = false;
-    private ClypeData dataToSendToClient;
-    private ClypeData dataToReceiveFromClient;
+    //private ClypeData dataToSendToClient;
+    //private ClypeData dataToReceiveFromClient;
     public static final int defaultPort = 7000;
-    private ObjectInputStream inFromClient = null;
-    private ObjectOutputStream outToClient = null;
+    //private ObjectInputStream inFromClient = null;
+    //private ObjectOutputStream outToClient = null;
     private ServerSocket sskt=null;
     private Socket cskt = null;
+    private ServerSideClientIO serverSideClientIOList[];
 
     /**
      * constructor for ClypeServer
@@ -23,8 +25,7 @@ public class ClypeServer {
     public ClypeServer(int port) {
         try {
             this.port = port;
-            dataToSendToClient = null;
-            dataToReceiveFromClient = null;
+            this.serverSideClientIOList = serverSideCLientIOList[];
         } catch (IllegalArgumentException aie) {
             System.err.println("Illegal port");
         }
@@ -47,17 +48,14 @@ public class ClypeServer {
        try {
            sskt = new ServerSocket(port);
            System.out.println("socket for server opened");
-           cskt = sskt.accept();
-           System.out.println("client accepted");
-           outToClient = new ObjectOutputStream(cskt.getOutputStream());
-           inFromClient = new ObjectInputStream(cskt.getInputStream());
            while(closeConnection == false) {
-               dataToSendToClient = dataToReceiveFromClient;
-               receiveData();
-               sendData();
+               cskt = sskt.accept();
+               System.out.println("client accepted");
+
            }
-           inFromClient.close();
-           outToClient.close();
+           //outToClient = new ObjectOutputStream(cskt.getOutputStream());
+           //inFromClient = new ObjectInputStream(cskt.getInputStream());
+
            cskt.close();
            sskt.close();
        } catch (IOException ioe) {
@@ -70,6 +68,7 @@ public class ClypeServer {
      * Opens a server and accepts a client socket <br>
      * it recieves and echoes data from client then closes <br>
      */
+    /*
     public void receiveData() {
         try {
             inFromClient = new ObjectInputStream(cskt.getInputStream());
@@ -84,12 +83,13 @@ public class ClypeServer {
             closeConnection =true;
         }
     }
-
+    */
     /**
      * Sends data <br>
      * Opens server socket and accepts client socket <br>
      * sends data to client and closes all sockets and steams when completed <br>
      */
+    /*
     public void sendData() {
         try {
             outToClient.writeObject(dataToSendToClient);
@@ -101,7 +101,7 @@ public class ClypeServer {
             closeConnection =true;
         }
     }
-
+    */
     /**
      * @return port number
      */
@@ -139,7 +139,12 @@ public class ClypeServer {
     public String toString() {
         return ("Port: " + this.getPort() + "\nClosed Connection: " + this.closeConnection);
     }
+    public void broadcast(dataToBroadcastToClients){
 
+    }
+    public void remove(serverSideClientToRemove){
+
+    }
     public static void main(String args[]) {
         if(args.length==0){
             ClypeServer CS = new ClypeServer();

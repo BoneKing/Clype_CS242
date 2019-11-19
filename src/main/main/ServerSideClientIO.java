@@ -8,7 +8,7 @@ import java.net.Socket;
 
 public class ServerSideClientIO implements Runnable{
     private boolean closeConnection = false;
-    ClypeData dataToReciveFromClient = null;
+    ClypeData dataToReceiveFromClient = null;
     ClypeData dataToSendToClient = null;
     ObjectInputStream inFromClient = null;
     ObjectOutputStream outToClient = null;
@@ -18,28 +18,45 @@ public class ServerSideClientIO implements Runnable{
     ServerSideClientIO(ClypeServer server, Socket clientSocket){
         this.server=server;
         this.clientSocket=clientSocket;
+        try {
+            inFromClient = new ObjectInputStream(clientSocket.getInputStream());
+        }
+        catch (IOException ioe) {
+            System.err.println("IO error: " + ioe.getMessage());
+            server.remove(this);
+        }
+
     }
     @Override
     public void run() {
         while(closeConnection == false){
             recieveData();
-            this.server.broadcast();
+            this.server.broadcast(dataToReceiveFromClient);
         }
     }
+    /**
+    * Opens a server and accepts a client socket <br>
+    * it recieves and echoes data from client then closes <br>
+    */
     public void recieveData(){
         try {
-            inFromClient = new ObjectInputStream(cskt.getInputStream());
             dataToReceiveFromClient = (ClypeData)inFromClient.readObject();
             //for debugging
             System.out.println(dataToReceiveFromClient);
         } catch (IOException ioe) {
             System.err.println("IO error: " + ioe.getMessage());
-            remove();
+            server.remove(this);
         } catch (IllegalArgumentException | ClassNotFoundException iae) {
             System.err.println("Illegal Arguement: " + iae.getMessage());
-            remove();
+            server.remove(this);
         }
     }
+
+    /**
+     * Sends data <br>
+     * Opens server socket and accepts client socket <br>
+     * sends data to client and closes all sockets and steams when completed <br>
+     */
     public void sendData(){
         try {
             outToClient.writeObject(dataToSendToClient);
@@ -51,7 +68,7 @@ public class ServerSideClientIO implements Runnable{
             closeConnection =true;
         }
     }
-    public void setDataToSendToClient(dataToSendToClient){
+    public void setDataToSendToClient(ClypeData dataToSendToClient){
         this.dataToSendToClient=dataToSendToClient;
     }
 }

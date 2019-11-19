@@ -3,7 +3,7 @@ package main;
 import data.ClypeData;
 import java.io.*;
 import  java.net.*;
-impor
+import java.util.*;
 
 public class ClypeServer {
     private int port;
@@ -15,7 +15,7 @@ public class ClypeServer {
     //private ObjectOutputStream outToClient = null;
     private ServerSocket sskt=null;
     private Socket cskt = null;
-    private ServerSideClientIO serverSideClientIOList[];
+    private ArrayList<ServerSideClientIO> serverSideClientIOList = new ArrayList<ServerSideClientIO> ();
 
     /**
      * constructor for ClypeServer
@@ -25,7 +25,7 @@ public class ClypeServer {
     public ClypeServer(int port) {
         try {
             this.port = port;
-            this.serverSideClientIOList = serverSideCLientIOList[];
+            ServerSideClientIO serverSideClientIOList[]={};
         } catch (IllegalArgumentException aie) {
             System.err.println("Illegal port");
         }
@@ -51,7 +51,10 @@ public class ClypeServer {
            while(closeConnection == false) {
                cskt = sskt.accept();
                System.out.println("client accepted");
-
+               ServerSideClientIO nSSCIO = new ServerSideClientIO(this, cskt);
+               serverSideClientIOList.add(nSSCIO);
+               Thread t = new Thread(new ServerSideClientIO(this, cskt));
+               t.start();
            }
            //outToClient = new ObjectOutputStream(cskt.getOutputStream());
            //inFromClient = new ObjectInputStream(cskt.getInputStream());
@@ -63,45 +66,6 @@ public class ClypeServer {
            closeConnection =true;
        }
     }
-
-    /**
-     * Opens a server and accepts a client socket <br>
-     * it recieves and echoes data from client then closes <br>
-     */
-    /*
-    public void receiveData() {
-        try {
-            inFromClient = new ObjectInputStream(cskt.getInputStream());
-            dataToReceiveFromClient = (ClypeData)inFromClient.readObject();
-            //for debugging
-            System.out.println(dataToReceiveFromClient);
-        } catch (IOException ioe) {
-            System.err.println("IO error: " + ioe.getMessage());
-            closeConnection =true;
-        } catch (IllegalArgumentException | ClassNotFoundException iae) {
-            System.err.println("Illegal Arguement: " + iae.getMessage());
-            closeConnection =true;
-        }
-    }
-    */
-    /**
-     * Sends data <br>
-     * Opens server socket and accepts client socket <br>
-     * sends data to client and closes all sockets and steams when completed <br>
-     */
-    /*
-    public void sendData() {
-        try {
-            outToClient.writeObject(dataToSendToClient);
-        } catch (IOException ioe) {
-            System.err.println("IO error: " + ioe.getMessage());
-            closeConnection =true;
-        } catch (IllegalArgumentException iae) {
-            System.err.println("Illegal Arguement: " + iae.getMessage());
-            closeConnection =true;
-        }
-    }
-    */
     /**
      * @return port number
      */
@@ -139,11 +103,28 @@ public class ClypeServer {
     public String toString() {
         return ("Port: " + this.getPort() + "\nClosed Connection: " + this.closeConnection);
     }
-    public void broadcast(dataToBroadcastToClients){
 
+    /**
+     *
+     * @param dataToBroadcastToClients
+     * sets data to send and sends data to all clients.
+     */
+    public synchronized void broadcast(ClypeData dataToBroadcastToClients){
+        for(int i =0; i< serverSideClientIOList.size();i++){
+            ServerSideClientIO tmp = serverSideClientIOList.get(i);
+            tmp.setDataToSendToClient(dataToBroadcastToClients);
+            tmp.sendData();
+        }
     }
-    public void remove(serverSideClientToRemove){
-
+    public synchronized void remove(ServerSideClientIO serverSideClientToRemove){
+        serverSideClientIOList.remove(serverSideClientToRemove);
+    }
+    public void LISTUSERS(){
+        for(int i=0;i<serverSideClientIOList.size();i++){
+            ServerSideClientIO tmp = serverSideClientIOList.get(i);
+            //tmp.setDataToSendToClient();
+            tmp.sendData();
+        }
     }
     public static void main(String args[]) {
         if(args.length==0){

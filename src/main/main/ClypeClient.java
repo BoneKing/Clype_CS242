@@ -90,7 +90,7 @@ public class ClypeClient {
             Thread t = new Thread(new ClientSideServerListener(this));
             t.start();
             while(closeConnection == false) {
-                this.inFromStd = new Scanner(System.in);
+                //this.inFromStd = new Scanner(System.in);
                 readClientData();
                 //System.out.println("readClientData");
                 sendData();
@@ -131,6 +131,7 @@ public class ClypeClient {
             }
         }
         else if(command.equals("LISTUSERS")){
+            //ClypeServer.LISTUSERS;
             /*this does nothing for now but
             will eventually return a list of users
             or an error if that's not possible
@@ -138,14 +139,14 @@ public class ClypeClient {
         }
         else{
             String message = command;
-            //System.out.println("message = "+message);
             /*
             while(inFromStd.next() != "r"){
                 message = message + inFromStd.next();
                 System.out.println("message = "+" "+message);
             }
-             */
+            */
             dataToSendToServer = new MessageClypeData(userName, message,3);
+            toString();
         }
 
     }
